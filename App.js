@@ -17,13 +17,13 @@ export default function App() {
 
   //Firebase configuration.
   const firebaseConfig = {
-      apiKey: "AIzaSyArl2Wks6eXrxThyRq2b3R_582anJ7JLG4",
-      authDomain: "afleveringopretevent.firebaseapp.com",
-      databaseURL: "https://afleveringopretevent-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "afleveringopretevent",
-      storageBucket: "afleveringopretevent.appspot.com",
-      messagingSenderId: "1067329306598",
-      appId: "1:1067329306598:web:fbd754e30084318326a027"
+      apiKey: "AIzaSyB_Ae2j4YTjZpwx4pQaBJWgAVsPuiNx0TI",
+      authDomain: "eksamensprojekt-4d5e8.firebaseapp.com",
+      databaseURL: "https://eksamensprojekt-4d5e8-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "eksamensprojekt-4d5e8",
+      storageBucket: "eksamensprojekt-4d5e8.appspot.com",
+      messagingSenderId: "733436120965",
+      appId: "1:733436120965:web:1046fbe85736c41ff1beec"
   };
 
 //Initialiserer Firebase.
