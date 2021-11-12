@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, Platform, FlatList, StyleSheet, Button, Alert } from 'react-native';
+import { View, Text, Platform, FlatList, StyleSheet, Button, Alert,Image } from 'react-native';
 import firebase from 'firebase';
 import {useEffect, useState} from "react";
 
@@ -62,10 +62,13 @@ const EventDetails = ({route,navigation}) => {
 
             {
                 Object.entries(Event).map((item,index)=>{
+                    //console.log(item[0]);
                     return(
                         <View style={styles.row} key={index}>
                             <Text style={styles.label}>{item[0]} </Text>
-                            <Text style={styles.value}>{item[1]}</Text>
+
+                            {(item[0] === 'Image') ? <Image source={{ uri: item[1] }} style={{ width: '100%', height: 150}} /> : <Text style={styles.value}>{item[1]}</Text>}
+
                         </View>
                     )
                 })
@@ -77,7 +80,7 @@ const EventDetails = ({route,navigation}) => {
         </View>
     );
 }
-
+//(item[0] ==='Image') ? Image source={{ uri: item.Image }} style={{ width: '100%', height: 150}} /> : <Text> </Text>
 export default EventDetails;
 
 const styles = StyleSheet.create({

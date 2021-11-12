@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {View, Text, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
+import {View, Text, FlatList, TouchableOpacity, StyleSheet, Image} from 'react-native';
 import firebase from 'firebase';
 import {useEffect, useState} from "react";
 
@@ -42,15 +42,19 @@ const EventList = ({navigation}) => {
             renderItem={({ item, index }) => {
                 return(
                     <TouchableOpacity style={styles.container} onPress={() => handleSelectEvent(eventId[index])}>
-                        <Text style={styles.label}>
-                            Name of the event: {item.Name}
-                        </Text>
-                        <Text>
-                            Time and date: {item.Time}
-                        </Text>
-                        <Text>
-                            Location: {item.Location}
-                        </Text>
+                        <View>
+                            <Text style={styles.label}>
+                                Name of the event: {item.Name}
+                            </Text>
+                            <Text>
+                                Time and date: {item.Time}
+                            </Text>
+                            <Text>
+                                Location: {item.Location}
+                            </Text>
+
+                            <Image source={{ uri: item.Image }} style={{ width: '100%', height: 150}} />
+                        </View>
                     </TouchableOpacity>
                 )
             }}
@@ -65,12 +69,10 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         borderStyle: "solid",
-
         borderWidth: 1,
         borderRadius:1,
         margin: 5,
         padding: 5,
-        height: 80,
         justifyContent:'center',
         borderBottomLeftRadius: 5,
         borderBottomRightRadius: 5,

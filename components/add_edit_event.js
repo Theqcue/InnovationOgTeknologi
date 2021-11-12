@@ -19,7 +19,8 @@ const add_edit_event = ({navigation,route}) => {
        Name: '',
         Location: '',
         Time:"",
-        Description:""
+        Description:"",
+        Image:""
     }
 
     const [newEvent,setNewEvent] = useState(initialState);
@@ -45,7 +46,7 @@ const add_edit_event = ({navigation,route}) => {
      // Gemmer disse oplysninger.
     const handleSave = () => {
 
-        const { Name, Location, Time, Description} = newEvent;
+        const { Name, Location, Time, Description, Image} = newEvent;
 
         // Tjekker om felterne er tomme.
         if(Name.length === 0 || Location.length === 0 || Time.length === 0 || Description.length === 0){
@@ -59,7 +60,7 @@ const add_edit_event = ({navigation,route}) => {
                     .database()
                     .ref(`/Events/${id}`)
                     // Updatet bruges til at opdatere kun de felter som er blevet ændret.
-                    .update({ Name, Location, Time, Description});
+                    .update({ Name, Location, Time, Description,Image});
                 // Når eventet er opdateret går man tilbage til det forrige view.
                 Alert.alert("Your event has been updated");
                 const Event = [id,newEvent]
@@ -74,7 +75,7 @@ const add_edit_event = ({navigation,route}) => {
                 firebase
                     .database()
                     .ref('/Events/')
-                    .push({ Name, Location, Time, Description});
+                    .push({ Name, Location, Time, Description,Image});
                 Alert.alert(`Saved`);
                 setNewEvent(initialState)
             } catch (error) {
