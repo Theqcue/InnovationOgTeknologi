@@ -10,7 +10,8 @@ import {
     SafeAreaView,
 } from 'react-native';
 import firebase from 'firebase';
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
+import Map from "./Map";
 
 // Hvilke felter skal eventet indeholde?
 const add_edit_event = ({navigation,route}) => {
@@ -20,18 +21,67 @@ const add_edit_event = ({navigation,route}) => {
         Location: '',
         Time:"",
         Description:"",
-        Image:""
+        Image:"",
     }
-
+    const [userMarkerCoordinates, setUserMarkerCoordinates] = useState([])
     const [newEvent,setNewEvent] = useState(initialState);
 
     // Tjekker og returnerer true hvis vi er i Edit Event felt.
     const isEditEvent = route.name === "Edit Event";
 
+    const childRef = useRef()
+
+    function removeItemOnce(arr, value) {
+        const index = arr.indexOf(value);
+        if (index > -1) {
+            arr.splice(index, 1);
+        }
+        return arr;
+    }
+    const callbackAdd = (coordinates) => {
+        for (let i = 0; i < userMarkerCoordinates.length; i++) {
+            console.log("before" + userMarkerCoordinates[i].latitude)
+        }
+        console.log('callbackAdd: ' + coordinates.latitude);
+        console.log('userMarkIn Edit before: ' + userMarkerCoordinates)
+        setUserMarkerCoordinates((oldArray) => [...oldArray, coordinates]);
+        console.log('userMarkIn Edit after: ' + userMarkerCoordinates)
+    }
+
+    const callbackRemove = (coordinates) => {
+        console.log('remove: ' + coordinates)
+        removeItemOnce(userMarkerCoordinates, coordinates);
+
+    }
+
+    const success = (state, { payload }) => {
+        const newArr = state.payload.concat(payload)
+        const idPositions = newArr.map(el => el.id)
+        const newPayload = newArr.filter((item, pos, arr) => {
+            return idPositions.indexOf(item.id) == pos;
+        })
+
+        return state.merge({ payload: newPayload })
+    }
+
     useEffect(() => {
         if(isEditEvent){
-            const Event = route.params.Event[1];
+            const Event = route.params.Event[0][1];
+            console.log('rouse: ' + route.params.Event[0][1])
             setNewEvent(Event)
+            const found = (Object.entries(Event)
+                .find(pair => pair[0] === 'userMarkerCoordinates'));
+            console.log("found - add" + found )
+            if(found != null)
+            {
+                if(route.params.Event[0][2] !== undefined) {
+                    console.log("Is not undefined - Add" + route.params.Event[0][2]);
+                    setUserMarkerCoordinates    (route.params.Event[0][2]);
+                } else {
+                    console.log("Is undefined- add" + found[1]);
+                    setUserMarkerCoordinates(found[1]);
+                }
+            }
         }
         // Data fjernes når man går til et andet view.
         return () => {
@@ -46,48 +96,52 @@ const add_edit_event = ({navigation,route}) => {
      // Gemmer disse oplysninger.
     const handleSave = () => {
 
-        const { Name, Location, Time, Description, Image} = newEvent;
 
+        const { Name, Location, Time, Description, Image} = newEvent;
+        console.log('userMarked' + userMarkerCoordinates)
         // Tjekker om felterne er tomme.
-        if(Name.length === 0 || Location.length === 0 || Time.length === 0 || Description.length === 0){
+        if(Name.length === 0 || Location.length === 0 || Time.length === 0 || Description.length === 0 ){
             return Alert.alert('You did not fill out one of the inputs!');
         }
 
         if(isEditEvent){
-            const id = route.params.Event[0];
+            const id = route.params.Event[0][0];
+            console.log("UserMarked: in is edt: " + userMarkerCoordinates);
             try {
                 firebase
                     .database()
                     .ref(`/Events/${id}`)
                     // Updatet bruges til at opdatere kun de felter som er blevet ændret.
-                    .update({ Name, Location, Time, Description,Image});
+                    .update({ Name, Location, Time, Description,Image,userMarkerCoordinates});
                 // Når eventet er opdateret går man tilbage til det forrige view.
+                const UserSend = userMarkerCoordinates
+                const Event = [id,newEvent, UserSend]
+                console.log('Event! ' + Event)
                 Alert.alert("Your event has been updated");
-                const Event = [id,newEvent]
                 navigation.navigate("Event Details",{Event});
             } catch (error) {
                 console.log(`Error: ${error.message}`);
             }
 
         }else{
-
             try {
                 firebase
                     .database()
                     .ref('/Events/')
-                    .push({ Name, Location, Time, Description,Image});
+                    .push({ Name, Location, Time, Description,Image, userMarkerCoordinates});
+                childRef.current.reset();
                 Alert.alert(`Saved`);
                 setNewEvent(initialState)
+                setUserMarkerCoordinates([]);
+
             } catch (error) {
                 console.log(`Error: ${error.message}`);
             }
         }
 
     };
-
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView>
                 {
                     Object.keys(initialState).map((key,index) =>{
                         return(
@@ -102,9 +156,10 @@ const add_edit_event = ({navigation,route}) => {
                         )
                     })
                 }
-                {}
+                <Text> Pick location: </Text>
+
+                <Map ref={childRef} parentCallback={callbackAdd}  parentRemoveCallback={callbackRemove} userMarkerCoordinatesParent={userMarkerCoordinates} isEditEvent={false}/>
                 <Button title={ isEditEvent ? "Save changes" : "Add Event"} onPress={() => handleSave()} color={"#4db5ac"} />
-            </ScrollView>
         </SafeAreaView>
     );
 }

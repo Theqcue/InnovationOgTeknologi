@@ -2,14 +2,27 @@ import * as React from 'react';
 import { View, Text, Platform, FlatList, StyleSheet, Button, Alert,Image } from 'react-native';
 import firebase from 'firebase';
 import {useEffect, useState} from "react";
+import Map from "./Map";
 
 const EventDetails = ({route,navigation}) => {
     const [Event,setEvent] = useState({});
+    const [userMarkerCoordinates, setUserMarkerCoordinates] = useState([])
 
     useEffect(() => {
         // Finder values for events og sætter dem ind.
         setEvent(route.params.Event[1]);
+        const found = (Object.entries(Event)
+            .find(pair => pair[0] === 'userMarkerCoordinates'));
 
+        if(found != null)
+            {
+                if(route.params.Event[2] !== undefined) {
+                    setUserMarkerCoordinates(route.params.Event[2]);
+                } else {
+
+                    setUserMarkerCoordinates(found[1]);
+                }
+            }
         // Når man forlader det view, skal værdierne være tomme.
         return () => {
             setEvent({})
@@ -18,7 +31,8 @@ const EventDetails = ({route,navigation}) => {
 
     const handleEdit = () => {
         // Man går videre til edit event view og sender alt det data from event man har valgt at redigere med.
-        const Event = route.params.Event
+        const Usersend = userMarkerCoordinates;
+        const Event = [route.params.Event, Usersend]
         navigation.navigate('Edit Event', { Event });
     };
 
@@ -56,27 +70,38 @@ const EventDetails = ({route,navigation}) => {
         return <Text>You have no upcoming events!</Text>;
     }
 
+    const renderElements = (item) => {
+        if(item[0] === 'Image')
+        {
+            return <Image source={{ uri: item[1] }} style={{ width: '100%', height: 150}} />
+        } else if(item[0] === 'userMarkerCoordinates'){
+            return <Text> </Text>//<Map userMarkerCoordinatesParent={item[1]} isEditEvent={true}/>
+        }else {
+            return <Text style={styles.value}>{item[1]}</Text>
+        }
+    }
+
+
     // Returnerer et event som er allerede oprettet så det kan redigeres eller slettes.
     return (
         <View style={styles.container}>
 
             {
                 Object.entries(Event).map((item,index)=>{
-                    //console.log(item[0]);
                     return(
                         <View style={styles.row} key={index}>
-                            <Text style={styles.label}>{item[0]} </Text>
-
-                            {(item[0] === 'Image') ? <Image source={{ uri: item[1] }} style={{ width: '100%', height: 150}} /> : <Text style={styles.value}>{item[1]}</Text>}
-
+                            {(item[0] === 'userMarkerCoordinates') ? null : <Text style={styles.label}>{item[0]} </Text>}
+                            {renderElements(item)}
                         </View>
                     )
                 })
             }
+            <Map userMarkerCoordinatesParent={userMarkerCoordinates} isEditEvent={true}/>
             <Text></Text>
             <Button title="Edit" onPress={ () => handleEdit()} color={"#4db5ac"} />
             <Text></Text>
             <Button title="Delete" onPress={() => confirmDelete()} color={"#4db5ac"}/>
+
         </View>
     );
 }
