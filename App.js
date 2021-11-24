@@ -1,68 +1,58 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import firebase from "firebase";
-import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
-import {createStackNavigator} from "@react-navigation/stack";
-import add_edit_event from "./components/add_edit_event";
-import eventDetails from "./components/eventDetails";
-import eventList from "./components/eventList";
-import {NavigationContainer} from "@react-navigation/native";
-import Ionicons from "react-native-vector-icons/Ionicons";
-import {StyleSheet, View, Text, Image} from "react-native";
+import {View, Image, Button} from "react-native";
 import logo from "./assets/logo.png"
+import FormLogin from "./components/user/formLogin";
+import FormSignup from "./components/user/formSignup";
+import HomeScreen from "./homeScreen";
 
-// Opretter stack og tab.
+//Firebase configuration.
+const firebaseConfig = {
+    apiKey: "AIzaSyCXlkO9ZUe4axYo3_sdjPzLaXNr-5B00S4",
+    authDomain: "iont-ff9fd.firebaseapp.com",
+    projectId: "iont-ff9fd",
+    storageBucket: "iont-ff9fd.appspot.com",
+    messagingSenderId: "726624841798",
+    appId: "1:726624841798:web:cf63096d38f7c9891b1a47"
+};
+
+// hvorfor skal funktionen eksporteres??
 export default function App() {
-  const Stack = createStackNavigator();
-  const Tab = createBottomTabNavigator();
-
-  //Firebase configuration.
-  const firebaseConfig = {
-      apiKey: "AIzaSyB_Ae2j4YTjZpwx4pQaBJWgAVsPuiNx0TI",
-      authDomain: "eksamensprojekt-4d5e8.firebaseapp.com",
-      databaseURL: "https://eksamensprojekt-4d5e8-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "eksamensprojekt-4d5e8",
-      storageBucket: "eksamensprojekt-4d5e8.appspot.com",
-      messagingSenderId: "733436120965",
-      appId: "1:733436120965:web:1046fbe85736c41ff1beec"
-  };
+// de state variable vi skal bruge til bruger
+    const [user, setUser] = useState({loggedIn: false});
 
 //Initialiserer Firebase.
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
 
-    function HomeScreen() {
+// function fra firebase som holder øje med om brugeren er logget ind eller ej
+    function onAuthStateChange(callback) {
+        return firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                callback({loggedIn: true, user: user});
+            } else {
+                callback({loggedIn: false});
+            }
+        });
+    }
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChange(setUser);
+        return () => {
+            unsubscribe();
+        };
+    }, []);
+
+    const StartScreen = (navigation) =>{
         return (
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff' }}>
-                <Image source={logo} style={{width:380, height:380}} ></Image>
+            <View style={{flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff'}}>
+                <Image source={logo} style={{width: 380, height: 380}}/>
+                <FormSignup/>
+                <FormLogin/>
+                <Button onPress={() => navigation.navigate('Upcoming Events')} title="Create user later"/>
             </View>
         );
     }
-
-
-// Opretter en konstant StackNavigation som navigerer mellem de tre screens.
-const StackNavigation = () => {
-  return (
-          <Stack.Navigator>
-        <Stack.Screen name={"Event List"} component={eventList} options={{title: "Your Event List",
-            headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold",}, headerStatusBarHeight:25}}/>
-        <Stack.Screen name={"Event Details"} component={eventDetails} options={{title: "Event Details",
-            headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold",}, headerStatusBarHeight:25}}/>
-        <Stack.Screen name={"Edit Event"} component={add_edit_event} options={{title: "Edit Event",
-            headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold",}, headerStatusBarHeight:25}}/>
-      </Stack.Navigator>
-  )
-}
-
- // Opretter en navigations container så man kan navigere mellem "Upcoming Events" tab og "Add Event" tabs. 
-  return (
-      <NavigationContainer>
-        <Tab.Navigator>
-            <Tab.Screen name={'Home'} component={HomeScreen} options={{tabBarIcon: () => ( <Ionicons name="home" size={30} color={"#4db5ac"} />),headerShown:null}}/>
-            <Tab.Screen name={'Upcoming Events'} component={StackNavigation} options={{tabBarIcon: () => ( <Ionicons name="list" size={30} color={"#4db5ac"} />),headerShown:null}}/>
-          <Tab.Screen name={'Add Event'} component={add_edit_event} options={{tabBarIcon: () => ( <Ionicons name="add" size={30} color={"#4db5ac"}/>), title: "Add Event",
-              headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold"}}}/>
-        </Tab.Navigator>
-      </NavigationContainer>
-  );
+    return user.loggedIn ? <HomeScreen/> : <StartScreen/> ;
 }
