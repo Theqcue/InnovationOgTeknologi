@@ -7,6 +7,7 @@ import Map from "./Map";
 const EventDetails = ({route,navigation}) => {
     const [Event,setEvent] = useState({});
     const [userMarkerCoordinates, setUserMarkerCoordinates] = useState([])
+    const [eventParticipation, seteventParticipation] = useState(false)
 
     useEffect(() => {
         // Finder values for events og sætter dem ind.
@@ -23,7 +24,14 @@ const EventDetails = ({route,navigation}) => {
                     setUserMarkerCoordinates(found[1]);
                 }
             }
-        // Når man forlader det view, skal værdierne være tomme.
+        //Find if the user is already participating in this event.
+            firebase.database().ref(`userEvents`).orderByChild('userId').equalTo(firebase.auth().currentUser.uid).on("value", function(snapshot) {
+                if (snapshot.exists()) {
+                    const eventId = Object.values(snapshot.val())[0].eventId;
+                    eventId.indexOf(route.params.Event[0]) === -1 ? seteventParticipation(false) : seteventParticipation(true);
+                }
+            });
+            // Når man forlader det view, skal værdierne være tomme.
         return () => {
             setEvent({})
         }
@@ -75,12 +83,62 @@ const EventDetails = ({route,navigation}) => {
         {
             return <Image source={{ uri: item[1] }} style={{ width: '100%', height: 150}} />
         } else if(item[0] === 'userMarkerCoordinates'){
-            return <Text> </Text>//<Map userMarkerCoordinatesParent={item[1]} isEditEvent={true}/>
+            return <Text> </Text>
+        }else if(item[0] === 'user'){
+            return <Text> </Text>
         }else {
             return <Text style={styles.value}>{item[1]}</Text>
         }
     }
+//.orderByChild('name').equalTo('John Doe').on("value", function(snapshot) {
+    function confirmDeltag() {
+        try {
+             firebase.database().ref(`userEvents`).orderByChild('userId').equalTo(firebase.auth().currentUser.uid).on("value", function(snapshot) {
+                 if (snapshot.exists()){
 
+                     const id = Object.keys(snapshot.val())[0];
+                     //const event1 = Object.values(snapshot.val())[0].event;
+                     const eventId = Object.values(snapshot.val())[0].eventId;
+
+                     //const event = event1.concat(Event);
+                     //const eventId =  [route.params.Event[0]].concat(eventId1);
+                     eventId.indexOf(route.params.Event[0]) === -1 ? eventId.push(route.params.Event[0]) : console.log("This item already exists");
+
+
+                     firebase
+                      .database()
+                         .ref(`/userEvents/${id}`)
+                         // Updatet bruges til at opdatere kun de felter som er blevet ændret.
+                         .update({ eventId});
+
+
+                     // snapshot.val().forEach(function(child) {
+                         //const userEvent = (oldArray) => [...oldArray, child.event]
+                         //child.ref.update(userEvent);
+                     //});
+                     //firebase
+                     //   .database()
+                     //   .ref(`/Events/${id}`).orderByChild('userId').equalTo(firebase.auth().currentUser.uid).get()
+                        // Updatet bruges til at opdatere kun de felter som er blevet ændret.
+                     //   .update({ Name, Location, Time, Description,Image,userMarkerCoordinates});
+
+                } else {
+                    const userId = firebase.auth().currentUser.uid;
+                    const event = [Event];
+                    const eventId = [route.params.Event[0]];
+
+                    firebase
+                        .database()
+                        .ref('/userEvents/')
+                        .push({ userId, eventId});
+                }
+
+            });
+
+        } catch (error) {
+            Alert.alert(error.message);
+        }
+    }
 
     // Returnerer et event som er allerede oprettet så det kan redigeres eller slettes.
     return (
@@ -90,7 +148,7 @@ const EventDetails = ({route,navigation}) => {
                 Object.entries(Event).map((item,index)=>{
                     return(
                         <View style={styles.row} key={index}>
-                            {(item[0] === 'userMarkerCoordinates') ? null : <Text style={styles.label}>{item[0]} </Text>}
+                            {(item[0] === 'userMarkerCoordinates' || item[0] === 'user' ) ? null : <Text style={styles.label}>{item[0]} </Text>}
                             {renderElements(item)}
                         </View>
                     )
@@ -98,9 +156,11 @@ const EventDetails = ({route,navigation}) => {
             }
             <Map userMarkerCoordinatesParent={userMarkerCoordinates} isEditEvent={true}/>
             <Text></Text>
-            <Button title="Edit" onPress={ () => handleEdit()} color={"#4db5ac"} />
+            {(firebase.auth().currentUser.uid !== Event.user) ? null : <Button title="Edit" onPress={ () => handleEdit()} color={"#4db5ac"} />}
             <Text></Text>
-            <Button title="Delete" onPress={() => confirmDelete()} color={"#4db5ac"}/>
+            {(firebase.auth().currentUser.uid !== Event.user) ? null : <Button title="Delete" onPress={() => confirmDelete()} color={"#4db5ac"}/>}
+            <Text></Text>
+            {(eventParticipation) ? <Text> you are participating this event</Text> : <Button title="Deltag" onPress={() => confirmDeltag()} color={"#4db5ac"}/>}
 
         </View>
     );

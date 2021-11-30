@@ -40,16 +40,11 @@ const add_edit_event = ({navigation,route}) => {
     }
     const callbackAdd = (coordinates) => {
         for (let i = 0; i < userMarkerCoordinates.length; i++) {
-            console.log("before" + userMarkerCoordinates[i].latitude)
         }
-        console.log('callbackAdd: ' + coordinates.latitude);
-        console.log('userMarkIn Edit before: ' + userMarkerCoordinates)
         setUserMarkerCoordinates((oldArray) => [...oldArray, coordinates]);
-        console.log('userMarkIn Edit after: ' + userMarkerCoordinates)
     }
 
     const callbackRemove = (coordinates) => {
-        console.log('remove: ' + coordinates)
         removeItemOnce(userMarkerCoordinates, coordinates);
 
     }
@@ -67,18 +62,14 @@ const add_edit_event = ({navigation,route}) => {
     useEffect(() => {
         if(isEditEvent){
             const Event = route.params.Event[0][1];
-            console.log('rouse: ' + route.params.Event[0][1])
             setNewEvent(Event)
             const found = (Object.entries(Event)
                 .find(pair => pair[0] === 'userMarkerCoordinates'));
-            console.log("found - add" + found )
             if(found != null)
             {
                 if(route.params.Event[0][2] !== undefined) {
-                    console.log("Is not undefined - Add" + route.params.Event[0][2]);
                     setUserMarkerCoordinates    (route.params.Event[0][2]);
                 } else {
-                    console.log("Is undefined- add" + found[1]);
                     setUserMarkerCoordinates(found[1]);
                 }
             }
@@ -98,7 +89,6 @@ const add_edit_event = ({navigation,route}) => {
 
 
         const { Name, Location, Time, Description, Image} = newEvent;
-        console.log('userMarked' + userMarkerCoordinates)
         // Tjekker om felterne er tomme.
         if(Name.length === 0 || Location.length === 0 || Time.length === 0 || Description.length === 0 ){
             return Alert.alert('You did not fill out one of the inputs!');
@@ -106,7 +96,6 @@ const add_edit_event = ({navigation,route}) => {
 
         if(isEditEvent){
             const id = route.params.Event[0][0];
-            console.log("UserMarked: in is edt: " + userMarkerCoordinates);
             try {
                 firebase
                     .database()
@@ -116,7 +105,6 @@ const add_edit_event = ({navigation,route}) => {
                 // Når eventet er opdateret går man tilbage til det forrige view.
                 const UserSend = userMarkerCoordinates
                 const Event = [id,newEvent, UserSend]
-                console.log('Event! ' + Event)
                 Alert.alert("Your event has been updated");
                 navigation.navigate("Event Details",{Event});
             } catch (error) {
@@ -125,10 +113,11 @@ const add_edit_event = ({navigation,route}) => {
 
         }else{
             try {
+                const user = firebase.auth().currentUser.uid;
                 firebase
                     .database()
                     .ref('/Events/')
-                    .push({ Name, Location, Time, Description,Image, userMarkerCoordinates});
+                    .push({ Name, Location, Time, Description,Image, userMarkerCoordinates,user});
                 childRef.current.reset();
                 Alert.alert(`Saved`);
                 setNewEvent(initialState)

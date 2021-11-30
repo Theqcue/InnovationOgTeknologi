@@ -43,6 +43,7 @@ const EventList = ({navigation}) => {
                 return(
                     <TouchableOpacity style={styles.container} onPress={() => handleSelectEvent(eventId[index])}>
                         <View>
+                            {((firebase.auth().currentUser.uid !== item.user) ? null : <Text style={styles.yourLabel}> YOUR EVENT </Text> )}
                             <Text style={styles.label}>
                                 Name of the event: {item.Name}
                             </Text>
@@ -83,5 +84,11 @@ const styles = StyleSheet.create({
         borderColor:"#4db5ac"
     },
     label: { fontWeight: 'bold', color:"#6e5e47",
-    },
+    }, yourLabel:
+        {
+            fontWeight: 'bold',
+            color:"#ec6e35",
+            textAlign: "center",
+        }
+
 });
