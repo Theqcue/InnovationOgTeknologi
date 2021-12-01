@@ -9,6 +9,7 @@ import eventDetails from "./components/event/eventDetails";
 import add_edit_event from "./components/event/add_edit_event";
 import Profile from "./components/user/profile";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import AllEventsMap from "./components/event/AllEventsMap";
 
 // siden man henvises til når man logger ind. Fører direkte til øverste lag i stacknavigatoren,
 // dvs. Upcoming Events lige nu.
@@ -57,6 +58,8 @@ function HomeScreen(){
                 <Tab.Screen name={'Home'} component={StackNavigationProfile} options={{tabBarIcon: () => ( <Ionicons name="home" size={30} color={"#4db5ac"} />),headerShown:null}}/>
                 <Tab.Screen name={'Upcoming Events'} component={StackNavigation} options={{tabBarIcon: () => ( <Ionicons name="list" size={30} color={"#4db5ac"} />),headerShown:null}}/>
                 <Tab.Screen name={'Add Event'} component={add_edit_event} options={{tabBarIcon: () => ( <Ionicons name="add" size={30} color={"#4db5ac"}/>), title: "Add Event",
+                    headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold"}}}/>
+                <Tab.Screen name={'Map'} component={AllEventsMap} options={{tabBarIcon: () => ( <Ionicons name="globe-outline" size={30} color={"#4db5ac"}/>), title: "Map",
                     headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold"}}}/>
             </Tab.Navigator>
         </NavigationContainer>
