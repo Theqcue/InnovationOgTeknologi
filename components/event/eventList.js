@@ -28,6 +28,7 @@ const EventList = ({navigation}) => {
     const handleSelectEvent = id => {
         const Event = Object.entries(Events).find( Event => Event[0] === id /*id*/)
         navigation.navigate('Event Details', { Event });
+
     };
 
     // Opretter et array af events og giver events IDs.

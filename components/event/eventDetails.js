@@ -29,6 +29,7 @@ const EventDetails = ({route,navigation}) => {
                 if (snapshot.exists()) {
                     const eventId = Object.values(snapshot.val())[0].eventId;
                     eventId.indexOf(route.params.Event[0]) === -1 ? seteventParticipation(false) : seteventParticipation(true);
+
                 }
             });
             // Når man forlader det view, skal værdierne være tomme.
@@ -104,23 +105,12 @@ const EventDetails = ({route,navigation}) => {
                      //const eventId =  [route.params.Event[0]].concat(eventId1);
                      eventId.indexOf(route.params.Event[0]) === -1 ? eventId.push(route.params.Event[0]) : console.log("This item already exists");
 
-
                      firebase
                       .database()
                          .ref(`/userEvents/${id}`)
                          // Updatet bruges til at opdatere kun de felter som er blevet ændret.
-                         .update({ eventId});
-
-
-                     // snapshot.val().forEach(function(child) {
-                         //const userEvent = (oldArray) => [...oldArray, child.event]
-                         //child.ref.update(userEvent);
-                     //});
-                     //firebase
-                     //   .database()
-                     //   .ref(`/Events/${id}`).orderByChild('userId').equalTo(firebase.auth().currentUser.uid).get()
-                        // Updatet bruges til at opdatere kun de felter som er blevet ændret.
-                     //   .update({ Name, Location, Time, Description,Image,userMarkerCoordinates});
+                         .update({ eventId}).then();
+                     //navigation.goBack();
 
                 } else {
                     const userId = firebase.auth().currentUser.uid;
@@ -131,7 +121,9 @@ const EventDetails = ({route,navigation}) => {
                         .database()
                         .ref('/userEvents/')
                         .push({ userId, eventId});
-                }
+                     //navigation.goBack();
+
+                 }
 
             });
 
