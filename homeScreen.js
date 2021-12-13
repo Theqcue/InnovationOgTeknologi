@@ -10,6 +10,7 @@ import add_edit_event from "./components/event/add_edit_event";
 import Profile from "./components/user/profile";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import AllEventsMap from "./components/event/AllEventsMap";
+import Picker from "./components/event/Picker";
 
 // siden man henvises til når man logger ind. Fører direkte til øverste lag i stacknavigatoren,
 // dvs. Upcoming Events lige nu.
@@ -61,6 +62,7 @@ function HomeScreen(){
                     headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold"}}}/>
                 <Tab.Screen name={'Map'} component={AllEventsMap} options={{tabBarIcon: () => ( <Ionicons name="globe-outline" size={30} color={"#4db5ac"}/>), title: "Map",
                     headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold"}}}/>
+
             </Tab.Navigator>
         </NavigationContainer>
     );

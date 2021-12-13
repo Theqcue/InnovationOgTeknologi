@@ -27,6 +27,7 @@ const EventDetails = ({route,navigation}) => {
         //Find if the user is already participating in this event.
             firebase.database().ref(`userEvents`).orderByChild('userId').equalTo(firebase.auth().currentUser.uid).on("value", function(snapshot) {
                 if (snapshot.exists()) {
+                    console.log("UE - EventDetail")
                     const eventId = Object.values(snapshot.val())[0].eventId;
                     eventId.indexOf(route.params.Event[0]) === -1 ? seteventParticipation(false) : seteventParticipation(true);
 
@@ -80,23 +81,27 @@ const EventDetails = ({route,navigation}) => {
     }
 
     const renderElements = (item) => {
-        if(item[0] === 'Image')
+        if(item[0] === 'filePath')
         {
             return <Image source={{ uri: item[1] }} style={{ width: '100%', height: 150}} />
         } else if(item[0] === 'userMarkerCoordinates'){
-            return <Text> </Text>
+            return null
         }else if(item[0] === 'user'){
-            return <Text> </Text>
-        }else {
+            return null
+        }else if(item[0] === 'Image') {
+            return null
+        } else {
             return <Text style={styles.value}>{item[1]}</Text>
         }
     }
 //.orderByChild('name').equalTo('John Doe').on("value", function(snapshot) {
-    function confirmDeltag() {
+    const confirmDeltag = async () =>  {
+        console.log("Pressed Confirm deltag");
+        console.log(route);
         try {
-             firebase.database().ref(`userEvents`).orderByChild('userId').equalTo(firebase.auth().currentUser.uid).on("value", function(snapshot) {
+             await firebase.database().ref(`userEvents`).orderByChild('userId').equalTo(firebase.auth().currentUser.uid).once("value", function(snapshot) {
                  if (snapshot.exists()){
-
+                     console.log("Inside snapshop")
                      const id = Object.keys(snapshot.val())[0];
                      //const event1 = Object.values(snapshot.val())[0].event;
                      const eventId = Object.values(snapshot.val())[0].eventId;
@@ -104,7 +109,8 @@ const EventDetails = ({route,navigation}) => {
                      //const event = event1.concat(Event);
                      //const eventId =  [route.params.Event[0]].concat(eventId1);
                      eventId.indexOf(route.params.Event[0]) === -1 ? eventId.push(route.params.Event[0]) : console.log("This item already exists");
-
+                     console.log("Ipdate: eventId");
+                     console.log(eventId);
                      firebase
                       .database()
                          .ref(`/userEvents/${id}`)
@@ -125,7 +131,7 @@ const EventDetails = ({route,navigation}) => {
 
                  }
 
-            });
+            }).then();
 
         } catch (error) {
             Alert.alert(error.message);
@@ -140,7 +146,7 @@ const EventDetails = ({route,navigation}) => {
                 Object.entries(Event).map((item,index)=>{
                     return(
                         <View style={styles.row} key={index}>
-                            {(item[0] === 'userMarkerCoordinates' || item[0] === 'user' ) ? null : <Text style={styles.label}>{item[0]} </Text>}
+                            {(item[0] === 'userMarkerCoordinates' || item[0] === 'user' || item[0] === 'filePath' || item[0] === 'Image' ) ? null : <Text style={styles.label}>{item[0]} </Text>}
                             {renderElements(item)}
                         </View>
                     )

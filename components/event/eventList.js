@@ -34,7 +34,6 @@ const EventList = ({navigation}) => {
     // Opretter et array af events og giver events IDs.
     const eventArray = Object.values(Events);
     const eventId = Object.keys(Events);
-
     return (
         <FlatList
             data={eventArray}
@@ -55,7 +54,7 @@ const EventList = ({navigation}) => {
                                 Location: {item.Location}
                             </Text>
 
-                            <Image source={{ uri: item.Image }} style={{ width: '100%', height: 150}} />
+                            <Image source={{ uri: item.filePath }} style={{ width: '100%', height: 150}} />
                         </View>
                     </TouchableOpacity>
                 )

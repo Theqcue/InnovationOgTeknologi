@@ -41,8 +41,6 @@ const Map = (prop, ref) => {
 
             const coordinate = event.nativeEvent.coordinate;
             setUserMarkerCoordinates((oldArray) => [...oldArray, coordinate]);
-            console.log('handle long press: ' + userMarkerCoordinates);
-            console.log('coordinate ' + coordinate);
             prop.parentCallback(coordinate);
         }
     };
@@ -136,8 +134,9 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         //paddingTop: Constants.statusBarHeight,
-        //backgroundColor: '#f0f0f5',
+        backgroundColor: '#f0f0f5',
         //padding: 8,
+        position: 'relative',
     },
     map: { flex: 1 },
     infoBox: {
