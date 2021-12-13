@@ -7,14 +7,18 @@ import Map from "./Map";
 const EventDetails = ({route,navigation}) => {
     const [Event,setEvent] = useState({});
     const [userMarkerCoordinates, setUserMarkerCoordinates] = useState([])
+    const [filePath, setFilePath] = useState("")
     const [eventParticipation, seteventParticipation] = useState(false)
 
     useEffect(() => {
-        // Finder values for events og sætter dem ind.
         setEvent(route.params.Event[1]);
         const found = (Object.entries(Event)
             .find(pair => pair[0] === 'userMarkerCoordinates'));
 
+        if(typeof (route.params.Event[3]) !== 'undefined' )
+        {
+            setFilePath(route.params.Event[3]);
+        }
         if(found != null)
             {
                 if(route.params.Event[2] !== undefined) {
@@ -27,7 +31,6 @@ const EventDetails = ({route,navigation}) => {
         //Find if the user is already participating in this event.
             firebase.database().ref(`userEvents`).orderByChild('userId').equalTo(firebase.auth().currentUser.uid).on("value", function(snapshot) {
                 if (snapshot.exists()) {
-                    console.log("UE - EventDetail")
                     const eventId = Object.values(snapshot.val())[0].eventId;
                     eventId.indexOf(route.params.Event[0]) === -1 ? seteventParticipation(false) : seteventParticipation(true);
 
@@ -83,7 +86,11 @@ const EventDetails = ({route,navigation}) => {
     const renderElements = (item) => {
         if(item[0] === 'filePath')
         {
-            return <Image source={{ uri: item[1] }} style={{ width: '100%', height: 150}} />
+            if(filePath.length > 0) {
+                return <Image source={{uri: filePath}} style={{width: '100%', height: 150}}/>
+            } else {
+                return <Image source={{uri: item[1]}} style={{width: '100%', height: 150}}/>
+            }
         } else if(item[0] === 'userMarkerCoordinates'){
             return null
         }else if(item[0] === 'user'){
@@ -95,28 +102,22 @@ const EventDetails = ({route,navigation}) => {
         }
     }
 //.orderByChild('name').equalTo('John Doe').on("value", function(snapshot) {
-    const confirmDeltag = async () =>  {
-        console.log("Pressed Confirm deltag");
-        console.log(route);
+    const confirmDeltag =  () =>  {
         try {
-             await firebase.database().ref(`userEvents`).orderByChild('userId').equalTo(firebase.auth().currentUser.uid).once("value", function(snapshot) {
-                 if (snapshot.exists()){
-                     console.log("Inside snapshop")
-                     const id = Object.keys(snapshot.val())[0];
-                     //const event1 = Object.values(snapshot.val())[0].event;
-                     const eventId = Object.values(snapshot.val())[0].eventId;
+            firebase.database().ref(`userEvents`).orderByChild('userId').equalTo(firebase.auth().currentUser.uid).once("value", function(snapshot) {
+            }).then((snapshot) => {
+                if (snapshot.exists()){
+                    const id = Object.keys(snapshot.val())[0];
+                    //const event1 = Object.values(snapshot.val())[0].event;
+                    const eventId = Object.values(snapshot.val())[0].eventId;
 
-                     //const event = event1.concat(Event);
-                     //const eventId =  [route.params.Event[0]].concat(eventId1);
-                     eventId.indexOf(route.params.Event[0]) === -1 ? eventId.push(route.params.Event[0]) : console.log("This item already exists");
-                     console.log("Ipdate: eventId");
-                     console.log(eventId);
-                     firebase
-                      .database()
-                         .ref(`/userEvents/${id}`)
-                         // Updatet bruges til at opdatere kun de felter som er blevet ændret.
-                         .update({ eventId}).then();
-                     //navigation.goBack();
+                    eventId.indexOf(route.params.Event[0]) === -1 ? eventId.push(route.params.Event[0]) : console.log("This item already exists");
+                    firebase
+                        .database()
+                        .ref(`/userEvents/${id}`)
+                        // Updatet bruges til at opdatere kun de felter som er blevet ændret.
+                        .update({ eventId}).then();
+                    //navigation.goBack();
 
                 } else {
                     const userId = firebase.auth().currentUser.uid;
@@ -127,11 +128,10 @@ const EventDetails = ({route,navigation}) => {
                         .database()
                         .ref('/userEvents/')
                         .push({ userId, eventId});
-                     //navigation.goBack();
+                    //navigation.goBack();
+                }
 
-                 }
-
-            }).then();
+            });
 
         } catch (error) {
             Alert.alert(error.message);

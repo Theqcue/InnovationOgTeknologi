@@ -2,7 +2,7 @@ import {Button, Text, SafeAreaView, TouchableOpacity, View, Image, FlatList, Sty
 import firebase from "firebase";
 import React, {useEffect, useState} from "react";
 import add_edit_event from "../event/add_edit_event";
-import {useIsFocused} from "@react-navigation/native";
+import {useFocusEffect, useIsFocused} from "@react-navigation/native";
 
 // brugerens egen side, kan tilgås når der er logget ind og viser abonnerede begivenheder?
 // evt også begivenheder man selv har oprettet?
@@ -16,84 +16,75 @@ const Profile = ({navigation,route}) => {
     const [isFocused, setIsFocused] = useState(true);
     const [Events,setEvents1] = useState([]);
     const [no_of_events,setNo_of_events] = useState(0);
+    const [firstRender,setFirstRender] = useState(true);
     //const [no_of_events,setNo_of_events] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [timesloading, setTimesLoading] = useState(0);
+    const [eventListId, setEventListId] = useState([]);
 
-    useEffect(() => {
-            console.log("Before setting []")
-            setEvents1([]);
-            console.log(Events.length < 1);
-                 firebase.database()
-                    .ref(`userEvents`)
-                    .orderByChild('userId')
-                    .equalTo(firebase.auth().currentUser.uid)
-                    .once("value", function (snapshot) {
-                        if (snapshot.exists()) {
-                            const eventId = Object.values(snapshot.val())[0].eventId;
-                            setNo_of_events(eventId.length);
-                            console.log(eventId);
-                            eventId.map(( (id) => {
-                                console.log("inside loop");
-                                firebase
-                                    .database()
-                                    // Eventets ID sættes ind.
-                                    .ref(`/Events/${id}`)
-                                    // Eventets data fjernes.
-                                    .on('value', snapshot => {
-                                        if (snapshot.exists()) {
-                                            console.log("Something here?");
-                                            setEvents1((oldArray) => [...oldArray, [id, snapshot.val()]]);
-                                        } else {
-                                            console.log('Does not exist');
+            useFocusEffect(
+                React.useCallback(() => {
+                firebase.database()
+                        .ref(`userEvents`)
+                        .orderByChild('userId')
+                        .equalTo(firebase.auth().currentUser.uid)
+                        .once("value", function (snapshot) {
+                        }).then((data) => {
+                    if (data.exists()) {
+                        const fetchedTasks = [];
+                        const eventId = Object.values(data.val())[0].eventId;
+                        setNo_of_events(eventId.length);
+                        eventId.map(( (id, index) => {
+                            firebase.database().ref(`/Events/${id}`)
+                                .once('value', dataSnapshot  => {
+
+                                    }).then((data) => {
+                                    fetchedTasks.push([id, data.val()]);
+                                    if(index === (eventId.length-1))
+                                        {
+                                            setEvents1(fetchedTasks);
                                         }
-                                    });
-                            }));
-                        }
-                    }).then();
-
-
-    },[isFocused]);
+                                    })
+                        }));
+                    }
+                });
+               return () => console.log("return");
+            },[])
+            );
 
     let eventArray = Object.values(Events);
     let eventId = Object.keys(Events);
 
+
     if (Events.length < 1) {
-        return <Text>You have no upcoming events</Text>;
-    }
+        return(<View>
+            <Text>You have no upcoming events</Text>
+
+        </View>);
+    };
 
     if(eventArray.length !== no_of_events)
     {
-        console.log(eventArray.length);
         return <Text>loading</Text>;
-    }
-    console.log("eventIds");
-    console.log(eventId);
-    //console.log(eventArray);
-
-    const test = () => {
-        console.log("HI");
     };
 
     const handleSelectEvent = Event => {
         navigation.navigate('Event Details', {Event});
     };
 
-    const updateview = () => {
-        setIsFocused(!isFocused);
-    }
 
     return (
-        <SafeAreaView>
+        <SafeAreaView style={{flex: 1}}>
             <Button onPress={() => handleLogOut()} title="Log out" />
-            <Button onPress={() => updateview()} title="Update view" />
             <Text>
                 Current user: {firebase.auth().currentUser.email}
             </Text>
             <Text style={styles.label}> Events that i am participating in: </Text>
             <FlatList
                 data={eventArray}
-                // Bruger event ID til at finde det rigtige event og returnere det.
-                keyExtractor={(item, index) => eventId[index]}
+                keyExtractor={(item, index) => eventArray[index][0]}
                 renderItem={({ item, index }) => {
+                    console.log(item[0]);
                     return(
                         <TouchableOpacity style={styles.container} onPress={() => handleSelectEvent([item[0], item[1]])}>
                             <View>

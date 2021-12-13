@@ -50,8 +50,6 @@ export default function Picker({getFilepath}) {
             if(!data.cancelled){
                 const newfile = {
                     uri:data.uri,
-                    //type:`pic/${data.uri.split(".")[1]}`,
-                    //name:`pic.${data.uri.split(".")[1]}`
                 }
                 //handleUpload(newfile)
                 console.log(newfile);

@@ -83,6 +83,7 @@ const add_edit_event = ({navigation,route}) => {
                     setUserMarkerCoordinates(found[1]);
                 }
             }
+            setCurrentFilepath(Event.filePath);
         }
         // Data fjernes når man går til et andet view.
         return () => {
@@ -172,7 +173,7 @@ const add_edit_event = ({navigation,route}) => {
 
     // Gemmer disse oplysninger.
     const handleSave = async() => {
-
+        setDisableButton(true);
 
         const { Name, Location, Time, Description, Image} = newEvent;
         // Tjekker om felterne er tomme.
@@ -184,35 +185,39 @@ const add_edit_event = ({navigation,route}) => {
         if(isEditEvent){
             const id = route.params.Event[0][0];
             try {
-                setDisableButton(true);
-                await firebase
+                firebase
                     .database()
                     .ref(`/Events/${id}`)
                     // Updatet bruges til at opdatere kun de felter som er blevet ændret.
-                    .update({ Name, Location, Time, Description,Image,userMarkerCoordinates, filePath});
-                // Når eventet er opdateret går man tilbage til det forrige view.
-                const UserSend = userMarkerCoordinates
-                const Event = [id,newEvent, UserSend]
-                Alert.alert("Your event has been updated");
-                navigation.navigate("Event Details",{Event});
+                    .update({ Name, Location, Time, Description,Image,userMarkerCoordinates, filePath}).then(() =>
+                {
+                    const UserSend = userMarkerCoordinates;
+                    const newFilePath = filePath;
+                    const Event = [id,newEvent, UserSend,newFilePath]
+                    Alert.alert("Your event has been updated");
+                    setDisableButton(false);
+                    navigation.navigate("Event Details",{Event});
+                });
+
             } catch (error) {
                 console.log(`Error: ${error.message}`);
             }
 
         }else{
             try {
-                setDisableButton(true);
                 const user = firebase.auth().currentUser.uid;
-                await firebase
+                firebase
                     .database()
                     .ref('/Events/')
-                    .push({ Name, Location, Time, Description,Image, userMarkerCoordinates,user, filePath});
-                childRef.current.reset();
-                Alert.alert(`Saved`);
-                setNewEvent(initialState)
-                setUserMarkerCoordinates([]);
-                setCurrentFilepath("");
-                setDisableButton(false);
+                    .push({ Name, Location, Time, Description,Image, userMarkerCoordinates,user, filePath}).then(()=>{
+                    childRef.current.reset();
+                    Alert.alert(`Saved`);
+                    setNewEvent(initialState)
+                    setUserMarkerCoordinates([]);
+                    setCurrentFilepath("");
+                    setDisableButton(false);
+                });
+
 
             } catch (error) {
                 console.log(`Error: ${error.message}`);
@@ -221,7 +226,8 @@ const add_edit_event = ({navigation,route}) => {
 
     };
 
-    const ImageUri = {uri:currentFilepath};
+    const ImageUri = (currentFilepath.length !== 0 ) ? {uri:currentFilepath} : "";
+
     return (
         <SafeAreaView style={styles.container}>
                 {

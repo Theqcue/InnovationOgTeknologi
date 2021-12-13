@@ -24,16 +24,20 @@ const EventList = ({navigation}) => {
         return <Text>You have no upcoming events</Text>;
     }
 
+    const test = () => {
+        console.log("HI");
+    };
+
     // Her søges der i et array af events for at finde det event objekt som vi søger efter.
     const handleSelectEvent = id => {
         const Event = Object.entries(Events).find( Event => Event[0] === id /*id*/)
-        navigation.navigate('Event Details', { Event });
-
+        navigation.navigate('Event Details', { Event});
     };
 
     // Opretter et array af events og giver events IDs.
     const eventArray = Object.values(Events);
     const eventId = Object.keys(Events);
+
     return (
         <FlatList
             data={eventArray}
@@ -84,7 +88,8 @@ const styles = StyleSheet.create({
         borderColor:"#4db5ac"
     },
     label: { fontWeight: 'bold', color:"#6e5e47",
-    }, yourLabel:
+    },
+    yourLabel:
         {
             fontWeight: 'bold',
             color:"#ec6e35",
