@@ -183,6 +183,22 @@ const add_edit_event = ({navigation,route}) => {
 
     };
 
+    const renderElemt = (item) =>
+    {
+        if(item=== 'Name')
+        {
+            return <Text style={styles.label}>Navn </Text>
+        } else if(item=== 'Location')
+        {
+            return <Text style={styles.label}>Lokation </Text>
+        }else if(item=== 'Time')
+        {
+            return <Text style={styles.label}>Tid </Text>
+        } else{
+            return <Text style={styles.label}>Beskrivelse </Text>
+        }
+    };
+
     const ImageUri = (currentFilepath.length !== 0 ) ? {uri:currentFilepath} : "";
 
     return (
@@ -191,8 +207,9 @@ const add_edit_event = ({navigation,route}) => {
                     Object.keys(initialState).map((key,index) =>{
                         return(
                             <View style={styles.row} key={index}>
-                                {(key === "Image") ? <Text> </Text> : <Text style={styles.label}>{key}</Text> }
-                                {(key === "Image") ? <Text> </Text>  : <TextInput
+                                {(key === "Image") ? <Text> </Text> : renderElemt(key) }
+                                {(key === "Image") ? <Text> </Text>  :
+                                    <TextInput
                                     value={newEvent[key]}
                                     onChangeText={(event) => changeTextInput(key,event)}
                                     style={styles.input}
@@ -201,10 +218,10 @@ const add_edit_event = ({navigation,route}) => {
                         )
                     })
                 }
-            <Text style={styles.label2}> Add Picture for event</Text>
+            <Text style={styles.label2}> Tilføj billede til event</Text>
             <Image source={ (currentFilepath.length !== 0) ? ImageUri : images.image } style={{ width: '60%', height: '20%'}} />
             <Picker getFilepath={getFilepath} style={styles.picks}/>
-            <Text style={styles.label2}> Pick location: </Text>
+            <Text style={styles.label2}> Vælg en eller flere loaktioner </Text>
             <Map ref={childRef} parentCallback={callbackAdd}  parentRemoveCallback={callbackRemove} userMarkerCoordinatesParent={userMarkerCoordinates} isEditEvent={false} style={styles.maps}/>
 
             <Button title={ isEditEvent ? "Gem ændringer" : "Tilføj Event"} onPress={() => handleSave()} color={"#4db5ac"} disabled={disableButton} />
