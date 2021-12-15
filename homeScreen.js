@@ -24,15 +24,15 @@ function HomeScreen(){
     const Stack2 = createStackNavigator();
     const Tab = createBottomTabNavigator();
 
-    // Opretter en konstant StackNavigation som navigerer mellem de tre screens.
+    // Creating stacks for navigation
     const StackNavigation = () => {
         return (
             <Stack.Navigator>
-                <Stack.Screen name={"Event List"} component={eventList} options={{title: "All Events",
+                <Stack.Screen name={"Event List"} component={eventList} options={{title: "Alle Events",
                     headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold",}, headerStatusBarHeight:25}}/>
-                <Stack.Screen name={"Event Details"} component={eventDetails} options={{title: "Event Details",
+                <Stack.Screen name={"Event Details"} component={eventDetails} options={{title: "",
                     headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold",}, headerStatusBarHeight:25}}/>
-                <Stack.Screen name={"Edit Event"} component={add_edit_event} options={{title: "Edit Event",
+                <Stack.Screen name={"Edit Event"} component={add_edit_event} options={{title: "Her kan du ændre dit event",
                     headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold",}, headerStatusBarHeight:25}}/>
             </Stack.Navigator>
         )
@@ -41,11 +41,11 @@ function HomeScreen(){
     const StackNavigationProfile = () => {
         return (
             <Stack2.Navigator>
-                <Stack2.Screen name={"User Profile"} component={Profile} options={{title: "Profile",
+                <Stack2.Screen name={"User Profile"} component={Profile} options={{title: "Din profil",
                     headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold",}, headerStatusBarHeight:25}}/>
-                <Stack2.Screen name={"Event Details"} component={eventDetails} options={{title: "Event Details",
+                <Stack2.Screen name={"Event Details"} component={eventDetails} options={{title: "",
                     headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold",}, headerStatusBarHeight:25}}/>
-                <Stack2.Screen name={"Edit Event"} component={add_edit_event} options={{title: "Edit Event",
+                <Stack2.Screen name={"Edit Event"} component={add_edit_event} options={{title: "Her kan du ændre dit event",
                     headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold",}, headerStatusBarHeight:25}}/>
 
             </Stack2.Navigator>
@@ -55,25 +55,25 @@ function HomeScreen(){
     const StackNavigationAllMap = () => {
         return (
             <Stack2.Navigator>
-                <Stack2.Screen name={"Map for all events"} component={AllEventsMap} options={{title: "All Events",
+                <Stack2.Screen name={"Map for all events"} component={AllEventsMap} options={{title: "Alle events",
                     headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold",}, headerStatusBarHeight:25}}/>
-                <Stack2.Screen name={"Event Details"} component={eventDetails} options={{title: "Event Details",
+                <Stack2.Screen name={"Event Details"} component={eventDetails} options={{title: "",
                     headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold",}, headerStatusBarHeight:25}}/>
-                <Stack2.Screen name={"Edit Event"} component={add_edit_event} options={{title: "Edit Event",
+                <Stack2.Screen name={"Edit Event"} component={add_edit_event} options={{title: "Her kan du ændre dit event",
                     headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold",}, headerStatusBarHeight:25}}/>
 
             </Stack2.Navigator>
         )
     }
-    // Opretter en navigations container så man kan navigere mellem "Upcoming Events" tab og "Add Event" tabs.
+    // Creating Tab navigation
     return (
         <NavigationContainer>
             <Tab.Navigator>
-                <Tab.Screen name={'Home'} component={StackNavigationProfile} options={{tabBarIcon: () => ( <Ionicons name="home" size={30} color={"#4db5ac"} />),headerShown:null}}/>
-                <Tab.Screen name={'Upcoming Events'} component={StackNavigation} options={{tabBarIcon: () => ( <Ionicons name="list" size={30} color={"#4db5ac"} />),headerShown:null}}/>
-                <Tab.Screen name={'Add Event'} component={add_edit_event} options={{tabBarIcon: () => ( <Ionicons name="add" size={30} color={"#4db5ac"}/>), title: "Add Event",
+                <Tab.Screen name={'Hjem'} component={StackNavigationProfile} options={{tabBarIcon: () => ( <Ionicons name="home" size={30} color={"#4db5ac"} />),headerShown:null}}/>
+                <Tab.Screen name={'Alle Events'} component={StackNavigation} options={{tabBarIcon: () => ( <Ionicons name="list" size={30} color={"#4db5ac"} />),headerShown:null}}/>
+                <Tab.Screen name={'Tilføj Event'} component={add_edit_event} options={{tabBarIcon: () => ( <Ionicons name="add" size={30} color={"#4db5ac"}/>), title: "Tilføj event",
                     headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold"}}}/>
-                <Tab.Screen name={'All Event Map'} component={StackNavigationAllMap} options={{tabBarIcon: () => ( <Ionicons name="globe-outline" size={30} color={"#4db5ac"} />),headerShown:null}}/>
+                <Tab.Screen name={'Kort'} component={StackNavigationAllMap} options={{tabBarIcon: () => ( <Ionicons name="globe-outline" size={30} color={"#4db5ac"} />),headerShown:null}}/>
 
             </Tab.Navigator>
         </NavigationContainer>

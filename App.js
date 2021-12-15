@@ -1,19 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import firebase from "firebase";
-import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
-import {createStackNavigator} from "@react-navigation/stack";
-import add_edit_event from "./components/event/add_edit_event";
-import eventDetails from "./components/event/eventDetails";
-import eventList from "./components/event/eventList";
-import Map from "./components/event/Map"
-import {NavigationContainer} from "@react-navigation/native";
-import Ionicons from "react-native-vector-icons/Ionicons";
+
 import {StyleSheet, View, Text, Image, Button, LogBox} from "react-native";
 import logo from "./assets/logo.png"
+import line from "./assets/Line.jpg"
 import FormLogin from "./components/user/formLogin";
 import FormSignup from "./components/user/formSignup";
 import HomeScreen from "./homeScreen";
-import { initializeApp } from "firebase/app";
 
 //Firebase configuration.
 const firebaseConfig = {
@@ -27,7 +20,8 @@ const firebaseConfig = {
 };
 //Not write warnings.
 firebase.setLogLevel('silent');
-LogBox.ignoreLogs(['Setting a timer']); // https://stackoverflow.com/questions/44603362/setting-a-timer-for-a-long-period-of-time-i-e-multiple-minutes
+LogBox.ignoreLogs(['Setting a timer', 'Warning']); // https://stackoverflow.com/questions/44603362/setting-a-timer-for-a-long-period-of-time-i-e-multiple-minutes
+//LogBox.ignoredYellowBox = ["Warning: Each", "Warning: Failed"];
 
 // hvorfor skal funktionen eksporteres??
 export default function App() {
@@ -59,13 +53,36 @@ export default function App() {
 
     const StartScreen = (navigation) =>{
         return (
-            <View style={{flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff'}}>
-                <Image source={logo} style={{width: 380, height: 380}}/>
-                <FormSignup/>
+            <View style={styles.container}>
+                <Image source={logo} style={styles.img}/>
                 <FormLogin/>
-                <Button onPress={() => navigation.navigate('Upcoming Events')} title="Create user later"/>
+                <Image source={line} style={styles.img2}/>
+                <Text style={styles.labl}> Har du ikke en bruger endnu?</Text>
+                <Text style={styles.labl}> Opret en bruger her: </Text>
+                <FormSignup/>
+
             </View>
         );
     }
     return user.loggedIn ? <HomeScreen/> : <StartScreen/> ;
 }
+const styles = StyleSheet.create({
+    container: {
+        alignItems: 'center',
+        flex: 1,
+        backgroundColor: '#ffffff',
+    },
+    img: {
+        width: 450,
+        height: 180,
+        marginTop: 30,
+    },
+    img2: {
+        height: 10,
+        marginTop: 15,
+        marginBottom: 5,
+    }, labl: {
+        color: "#ec6e35",
+    }
+
+});

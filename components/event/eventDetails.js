@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, Platform, FlatList, StyleSheet, Button, Alert,Image } from 'react-native';
+import { View, Text, Platform, FlatList, StyleSheet, Button, Alert,Image, ScrollView,SafeAreaView  } from 'react-native';
 import firebase from 'firebase';
 import {useEffect, useState} from "react";
 import Map from "./Map";
@@ -10,6 +10,7 @@ const EventDetails = ({route,navigation}) => {
     const [filePath, setFilePath] = useState("")
     const [eventParticipation, seteventParticipation] = useState(false)
 
+    //Sets the states, with the information in the specific event.
     useEffect(() => {
         setEvent(route.params.Event[1]);
         const found = (Object.entries(Event)
@@ -36,12 +37,13 @@ const EventDetails = ({route,navigation}) => {
 
                 }
             });
-            // Når man forlader det view, skal værdierne være tomme.
+            // set empty event when leaving the view
         return () => {
             setEvent({})
         }
     });
 
+    //Navigate to edit event
     const handleEdit = () => {
         // Man går videre til edit event view og sender alt det data from event man har valgt at redigere med.
         const Usersend = userMarkerCoordinates;
@@ -49,40 +51,32 @@ const EventDetails = ({route,navigation}) => {
         navigation.navigate('Edit Event', { Event });
     };
 
-    // Vi spørger brugeren om han er sikker
-    const confirmDelete = () => {
-        // Laver en alert besked hvor der står om man er sikker på at eventet skal slettes.
-        if(Platform.OS ==='ios' || Platform.OS ==='android'){
-            Alert.alert('Are you sure?', 'Do you want to delete this event?', [
-                { text: 'Cancel', style: 'cancel' },
-                // Eventet bliver slettet når der trykkes på delete.
-                { text: 'Delete', style: 'destructive', onPress: () => handleDelete() },
-            ]);
-        }
-    };
-
-    // Eventet slettes.
-    const  handleDelete = () => {
-        const id = route.params.Event[0];
-        try {
-            firebase
-                .database()
-                // Eventets ID sættes ind.
-                .ref(`/Events/${id}`)
-                // Eventets data fjernes.
-                .remove();
-            // Går tilbage når det er udført.
-            navigation.goBack();
-        } catch (error) {
-            Alert.alert(error.message);
-        }
-    };
-
-
     if (!Event) {
         return <Text>You have no upcoming events!</Text>;
     }
+    //Render page, with correct labels in danish
+    const renderElements2 = (item) => {
+        if(item[0] === 'filePath')
+        {
+        } else if(item[0] === 'userMarkerCoordinates'){
+            return null
+        }else if(item[0] === 'user'){
+            return null
+        }else if(item[0] === 'Image') {
+            return null
+        } else if(item[0] === 'Description') {
+            return(<Text style={styles.label}>Beskrivelse</Text>)
 
+        }else if(item[0] === 'Location') {
+            return <Text style={styles.label}> Lokation: </Text>
+
+        }else if(item[0] === 'Name') {
+            return <Text style={styles.label}>Navn: </Text>
+
+        }else if(item[0] === 'Time') {
+            return<Text style={styles.label}>Tid: </Text>
+        }
+    }
     const renderElements = (item) => {
         if(item[0] === 'filePath')
         {
@@ -97,18 +91,27 @@ const EventDetails = ({route,navigation}) => {
             return null
         }else if(item[0] === 'Image') {
             return null
-        } else {
+        } else if(item[0] === 'Description') {
+            return(<Text style={styles.value}>{item[1]}</Text>)
+
+        }else if(item[0] === 'Location') {
+            return <Text style={styles.value}>{item[1]}</Text>
+
+        }else if(item[0] === 'Name') {
+            return <Text style={styles.value}>{item[1]}</Text>
+
+        }else if(item[0] === 'Time') {
             return <Text style={styles.value}>{item[1]}</Text>
         }
+
     }
-//.orderByChild('name').equalTo('John Doe').on("value", function(snapshot) {
+    // Update database that you are attending this event. If person has not attended anything before create a userEvent, else update user event with new event.
     const confirmDeltag =  () =>  {
         try {
             firebase.database().ref(`userEvents`).orderByChild('userId').equalTo(firebase.auth().currentUser.uid).once("value", function(snapshot) {
             }).then((snapshot) => {
                 if (snapshot.exists()){
                     const id = Object.keys(snapshot.val())[0];
-                    //const event1 = Object.values(snapshot.val())[0].event;
                     const eventId = Object.values(snapshot.val())[0].eventId;
 
                     eventId.indexOf(route.params.Event[0]) === -1 ? eventId.push(route.params.Event[0]) : console.log("This item already exists");
@@ -117,8 +120,6 @@ const EventDetails = ({route,navigation}) => {
                         .ref(`/userEvents/${id}`)
                         // Updatet bruges til at opdatere kun de felter som er blevet ændret.
                         .update({ eventId}).then();
-                    //navigation.goBack();
-
                 } else {
                     const userId = firebase.auth().currentUser.uid;
                     const event = [Event];
@@ -128,41 +129,43 @@ const EventDetails = ({route,navigation}) => {
                         .database()
                         .ref('/userEvents/')
                         .push({ userId, eventId});
-                    //navigation.goBack();
                 }
-
             });
-
         } catch (error) {
             Alert.alert(error.message);
         }
     }
 
-    // Returnerer et event som er allerede oprettet så det kan redigeres eller slettes.
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
+            <View style={styles.thisview}>
+                <ScrollView >
 
             {
                 Object.entries(Event).map((item,index)=>{
                     return(
                         <View style={styles.row} key={index}>
-                            {(item[0] === 'userMarkerCoordinates' || item[0] === 'user' || item[0] === 'filePath' || item[0] === 'Image' ) ? null : <Text style={styles.label}>{item[0]} </Text>}
+                            {renderElements2(item)}
                             {renderElements(item)}
                         </View>
                     )
                 })
             }
+                </ScrollView>
+            </View>
+
             <Map userMarkerCoordinatesParent={userMarkerCoordinates} isEditEvent={true}/>
             <Text></Text>
-            {(firebase.auth().currentUser.uid !== Event.user) ? null : <Button title="Edit" onPress={ () => handleEdit()} color={"#4db5ac"} />}
+            {(firebase.auth().currentUser.uid !== Event.user) ? null : <Button title="Rediger" onPress={ () => handleEdit()} color={"#4db5ac"} />}
             <Text></Text>
-            {(eventParticipation) ? <Text> you are participating this event</Text> : <Button title="Deltag" onPress={() => confirmDeltag()} color={"#4db5ac"}/>}
+            {(eventParticipation) ? <Text> Du deltager allerede i dette event</Text> : <Button title="Deltag" onPress={() => confirmDeltag()} color={"#4db5ac"}/>}
 
-        </View> 
+
+
+        </SafeAreaView>
     );
 }
-//(item[0] ==='Image') ? Image source={{ uri: item.Image }} style={{ width: '100%', height: 150}} /> : <Text> </Text>
-//{(firebase.auth().currentUser.uid !== Event.user) ? null : <Button title="Delete" onPress={() => confirmDelete()} color={"#4db5ac"}/>}
+
 export default EventDetails;
 
 const styles = StyleSheet.create({
@@ -187,4 +190,9 @@ const styles = StyleSheet.create({
     },
     label: { width: 100, fontWeight: 'bold', color:"#6e5e47"},
     value: { flex: 1, color:"#6e5e47" },
+    thisview:
+        {
+        height: 350,
+    },
+
 });

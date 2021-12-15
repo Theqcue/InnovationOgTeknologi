@@ -36,17 +36,17 @@ const Map = (prop, ref) => {
         const response = getLocationPermission()
     });
 
+    //Adds new marker when long press
     const handleLongPress = event => {
         if(!prop.isEditEvent) {
 
             const coordinate = event.nativeEvent.coordinate;
             setUserMarkerCoordinates((oldArray) => [...oldArray, coordinate]);
-            console.log('handle long press: ' + userMarkerCoordinates);
-            console.log('coordinate ' + coordinate);
             prop.parentCallback(coordinate);
         }
     };
 
+    //Find the address of the selected marker
     const handleSelectMarker = async coordinate =>{
             setSelectedCoordinate(coordinate)
             await Location.reverseGeocodeAsync(coordinate).then((data) => {
@@ -61,30 +61,24 @@ const Map = (prop, ref) => {
         }
         return arr;
     }
-
+    //Delete the Marker
     const DeleteBox = () => {
         removeItemOnce(userMarkerCoordinates, selectedCoordinate);
         prop.parentRemoveCallback(selectedCoordinate);
         setSelectedCoordinate(null) && setSelectedAddress(null);
 
     }
+    //Close pop up box
     const CloseBox = () => {
         setSelectedCoordinate(null) && setSelectedAddress(null);
     }
-
-    const logging = (item) =>
-    {
-        if(item.length > 0) {
-            //console.log('logging ' + item[0].longitude);
-        }
-    }
-
+    //Getting users currect location
     const RenderCurrentLocation = (props) => {
         if (props.hasLocationPermission === null) {
             return null;
         }
         if (props.hasLocationPermission === false) {
-            return <Text>No location access. Go to settings to change</Text>;
+            return <Text>Ikke nogen lokationsadgang. Gå til indstillinger for at ændre. </Text>;
         }
         return (
             <Text></Text>
@@ -106,7 +100,6 @@ const Map = (prop, ref) => {
                         longitudeDelta: 0.05,
                     }}>
 
-                    {logging(userMarkerCoordinates)}
                     {prop.userMarkerCoordinatesParent.map((coordinate, index) => (
                         <Marker
                             coordinate={coordinate}

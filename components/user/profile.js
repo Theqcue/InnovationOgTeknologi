@@ -13,15 +13,10 @@ const Profile = ({navigation,route}) => {
         await firebase.auth().signOut();
     };
 
-    const [isFocused, setIsFocused] = useState(true);
     const [Events,setEvents1] = useState([]);
     const [no_of_events,setNo_of_events] = useState(0);
-    const [firstRender,setFirstRender] = useState(true);
-    //const [no_of_events,setNo_of_events] = useState(0);
-    const [loading, setLoading] = useState(false);
-    const [timesloading, setTimesLoading] = useState(0);
-    const [eventListId, setEventListId] = useState([]);
 
+    //Getting all the events that the user is participating in
             useFocusEffect(
                 React.useCallback(() => {
                 firebase.database()
@@ -33,7 +28,6 @@ const Profile = ({navigation,route}) => {
                     if (data.exists()) {
                         const fetchedTasks = [];
                         const eventId = Object.values(data.val())[0].eventId;
-                        console.log(eventId);
                         setNo_of_events(eventId.length);
                         eventId.map(( (id, index) => {
                             firebase.database().ref(`/Events/${id}`)
@@ -56,51 +50,51 @@ const Profile = ({navigation,route}) => {
             },[])
             );
 
-    let eventArray = Object.values(Events);
-    let eventId = Object.keys(Events);
 
+            let eventArray = Object.values(Events);
 
+//You are now currently attending any events message
     if (Events.length < 1) {
-        return(<View>
-            <Text>You have no upcoming events</Text>
+        return(
+        <View style={styles.container}>
+            <Text style={styles.labelT}>Du deltager ikke i nogen events</Text>
+            <Text style={styles.labelTop}>
+                Bruger: {firebase.auth().currentUser.email}
+            </Text>
+            <Button onPress={() => handleLogOut()} title="Log ud" />
         </View>);
     };
 
+    //The screen is still loading
     if(eventArray.length !== no_of_events)
     {
-        console.log(no_of_events);
-        console.log(eventArray.length);
         return <Text>loading</Text>;
     };
 
+    //Navigate to event details
     const handleSelectEvent = Event => {
         navigation.navigate('Event Details', {Event});
     };
 
     return (
         <SafeAreaView style={{flex: 1}}>
-            <Button onPress={() => handleLogOut()} title="Log out" />
-            <Text>
-                Current user: {firebase.auth().currentUser.email}
-            </Text>
-            <Text style={styles.label}> Events that i am participating in: </Text>
+            <Text style={styles.labelT}> Mine Events </Text>
             <FlatList
                 data={eventArray}
                 keyExtractor={(item, index) => eventArray[index][0]}
                 renderItem={({ item, index }) => {
-                    console.log("item");
-                    console.log(item);
+
                     return(
                         <TouchableOpacity style={styles.container} onPress={() => handleSelectEvent([item[0], item[1]])}>
                             <View>
                                 <Text style={styles.label}>
-                                    Name of the event: {item[1].Name}
+                                    {item[1].Name}
                                 </Text>
                                 <Text>
-                                    Time and date: {item[1].Time}
+                                    Tidspunkt: {item[1].Time}
                                 </Text>
                                 <Text>
-                                    Location: {item[1].Location}
+                                    Lokation: {item[1].Location}
                                 </Text>
 
                                 <Image source={{ uri: item[1].filePath }} style={{ width: '100%', height: 150}} />
@@ -110,7 +104,10 @@ const Profile = ({navigation,route}) => {
                     )
                 }}
             />
-            <Text> HI </Text>
+            <Text style={styles.labelTop}>
+                Bruger: {firebase.auth().currentUser.email}
+            </Text>
+            <Button onPress={() => handleLogOut()} title="Log ud" />
         </SafeAreaView>
     )
 }
@@ -133,7 +130,24 @@ const styles = StyleSheet.create({
         backgroundColor: "#ffff",
         borderColor:"#4db5ac"
     },
-    label: { fontWeight: 'bold', color:"#6e5e47",
+    label: {
+        fontWeight: 'bold',
+        textAlign:"center",
+
     },
+    labelT: {
+        fontWeight: 'bold',
+        color:"#ec6e35",
+        textAlign:"center",
+
+    }, labelTop: {
+        fontWeight: 'bold',
+        color:"#6e5e47",
+        textAlign:"center",
+        fontStyle: "italic",
+
+    },
+
+
 });
 

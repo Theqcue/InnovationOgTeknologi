@@ -11,7 +11,7 @@ export function ImagePickerModal({
                                      onCameraPress,
                                  }) {
 
-
+//Creates Modal for picking either Library function or Camara function
     return (
         <Modal
             isVisible={isVisible}

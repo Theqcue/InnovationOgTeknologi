@@ -8,6 +8,7 @@ const EventList = ({navigation}) => {
 
     const [Events,setEvents] = useState()
 
+    //Getting all the events from the database
     useEffect(() => {
         if(!Events) {
             firebase
@@ -19,29 +20,24 @@ const EventList = ({navigation}) => {
         }
     },[]);
 
-// Hvis der er ikke nogle events, vises der at der er ikke noget data.
+// If there are no events, just show that there are no upcoming events
     if (!Events) {
         return <Text>You have no upcoming events</Text>;
     }
 
-    const test = () => {
-        console.log("HI");
-    };
 
-    // Her søges der i et array af events for at finde det event objekt som vi søger efter.
+    // find the selected event, and navigate to details
     const handleSelectEvent = id => {
         const Event = Object.entries(Events).find( Event => Event[0] === id /*id*/)
         navigation.navigate('Event Details', { Event});
     };
 
-    // Opretter et array af events og giver events IDs.
     const eventArray = Object.values(Events);
     const eventId = Object.keys(Events);
 
     return (
         <FlatList
             data={eventArray}
-            // Bruger event ID til at finde det rigtige event og returnere det.
             keyExtractor={(item, index) => eventId[index]}
             renderItem={({ item, index }) => {
                 return(
@@ -49,13 +45,13 @@ const EventList = ({navigation}) => {
                         <View>
                             {((firebase.auth().currentUser.uid !== item.user) ? null : <Text style={styles.yourLabel}> YOUR EVENT </Text> )}
                             <Text style={styles.label}>
-                                Name of the event: {item.Name}
+                                {item.Name}
                             </Text>
                             <Text>
-                                Time and date: {item.Time}
+                                Tidspunkt: {item.Time}
                             </Text>
                             <Text>
-                                Location: {item.Location}
+                                Lokation: {item.Location}
                             </Text>
 
                             <Image source={{ uri: item.filePath }} style={{ width: '100%', height: 150}} />
@@ -87,7 +83,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#ffff",
         borderColor:"#4db5ac"
     },
-    label: { fontWeight: 'bold', color:"#6e5e47",
+    label: { fontWeight: 'bold', color:"#6e5e47", textAlign:"center"
     },
     yourLabel:
         {

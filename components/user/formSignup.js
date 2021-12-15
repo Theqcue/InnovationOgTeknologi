@@ -12,7 +12,7 @@ function formSignup() {
     const renderButton = () => {
         return <Button onPress={() => handleSubmit()} title="Create user" />;
     };
-
+    //Creating a new user
     const handleSubmit = async() => {
         try {
             await firebase.auth().createUserWithEmailAndPassword(email, password).then((data)=>{
@@ -24,15 +24,15 @@ function formSignup() {
 
     return (
         <View>
-            <Text style={styles.header}>Sign up</Text>
+
             <TextInput
-                placeholder="email"
+                placeholder="Email"
                 value={email}
                 onChangeText={(email) => setEmail(email)}
                 style={styles.inputField}
             />
             <TextInput
-                placeholder="password"
+                placeholder="Password"
                 value={password}
                 onChangeText={(password) => setPassword(password)}
                 secureTextEntry
@@ -45,6 +45,7 @@ function formSignup() {
         </View>
     );
 }
+//<Text style={styles.header}>Sign up</Text>
 
 export default formSignup
 
@@ -56,6 +57,9 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         margin: 10,
         padding: 10,
+        borderColor: "#4db5ac",
+        width: 300,
+        borderRadius: 10,
     },
     header: {
         fontSize: 34,

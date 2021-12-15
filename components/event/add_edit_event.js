@@ -6,19 +6,15 @@ import {
     TextInput,
     Button,
     Alert,
-    ScrollView,
     SafeAreaView,
     Image,
-    TouchableOpacity,
 } from 'react-native';
 import firebase from 'firebase';
 import {useEffect, useRef, useState} from "react";
 import Map from "./Map";
-import UploadImage from "./UploadImage";
 import Picker from "./Picker";
 import { images } from "../../assets"
 
-// Hvilke felter skal eventet indeholde?
 const add_edit_event = ({navigation,route}) => {
     const initialState = {
        Name: '',
@@ -27,20 +23,18 @@ const add_edit_event = ({navigation,route}) => {
         Description:"",
         Image:"",
     }
+    //Setting states
     const [userMarkerCoordinates, setUserMarkerCoordinates] = useState([])
     const [newEvent,setNewEvent] = useState(initialState);
-    const [filepath,setfilepath] = useState("");
     const [currentFilepath,setCurrentFilepath] = useState("");
-    const [downloadURL, setDownloadURL] = useState(false);
-    const [progress, setProgress] = useState(0);
     const [uploading, setUploading] = useState(false);
     const [disableButton, setDisableButton] = useState(false);
 
-    // Tjekker og returnerer true hvis vi er i Edit Event felt.
+    // Check where the event came from
     const isEditEvent = route.name === "Edit Event";
 
     const childRef = useRef()
-
+    //Helper function
     function removeItemOnce(arr, value) {
         const index = arr.indexOf(value);
         if (index > -1) {
@@ -48,31 +42,23 @@ const add_edit_event = ({navigation,route}) => {
         }
         return arr;
     }
+    //Used when getting a callback from Map. Adds to the array of markers
     const callbackAdd = (coordinates) => {
         for (let i = 0; i < userMarkerCoordinates.length; i++) {
         }
         setUserMarkerCoordinates((oldArray) => [...oldArray, coordinates]);
     }
-
+    //Used when getting a callback from Map. removes from the array of markers
     const callbackRemove = (coordinates) => {
         removeItemOnce(userMarkerCoordinates, coordinates);
 
     }
-
-    const success = (state, { payload }) => {
-        const newArr = state.payload.concat(payload)
-        const idPositions = newArr.map(el => el.id)
-        const newPayload = newArr.filter((item, pos, arr) => {
-            return idPositions.indexOf(item.id) == pos;
-        })
-
-        return state.merge({ payload: newPayload })
-    }
-
+    //Setting states if navigation comes from edit event
     useEffect(() => {
         if(isEditEvent){
             const Event = route.params.Event[0][1];
             setNewEvent(Event)
+            //Setting the map-markers of the event
             const found = (Object.entries(Event)
                 .find(pair => pair[0] === 'userMarkerCoordinates'));
             if(found != null)
@@ -83,20 +69,21 @@ const add_edit_event = ({navigation,route}) => {
                     setUserMarkerCoordinates(found[1]);
                 }
             }
+            //Setting the current filepath
             setCurrentFilepath(Event.filePath);
         }
-        // Data fjernes når man går til et andet view.
+        // Data gets removed when going to another view
         return () => {
             setNewEvent(initialState)
         };
     }, []);
 
-    // Ændrer event oplysninger.
+    // Changes the event
     const changeTextInput = (name,event) => {
         setNewEvent({...newEvent, [name]: event});
     }
+    //Getting the Blob of the image the user has picked
     const getPictureBlob = async(uri) => {
-        //console.log(uri);
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
             xhr.onload = function () {
@@ -110,7 +97,7 @@ const add_edit_event = ({navigation,route}) => {
             xhr.send(null);
         });
     };
-
+    //Uploads the picture to firebase storage
     const handleUpload = async(uri, name) => {
         let blob;
         let storage = firebase.storage();
@@ -123,68 +110,35 @@ const add_edit_event = ({navigation,route}) => {
         } catch (e) {
             alert("Please Select a Photo First");
             setUploading(false);
-            //setUpdate(false);
         } finally {
             blob.close();
             setUploading(false);
-            //setUpdate(false);
-            //alert("saved successfully");
         }
 
-
-       /* let file = uri;
-        let storage = firebase.storage();
-        let storageRef = storage.ref();
-        let uploadTask = storageRef.child('folder/' + file.name).put(file);
-
-        uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED,
-            (snapshot) =>{
-                const progress = Math.round((snapshot.bytesTransferred/snapshot.totalBytes))*100
-                setProgress({progress})
-                console.log("progress");
-                console.log(progress);
-            },(error) =>{
-                throw error
-            },() =>{
-                // uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) =>{
-
-                uploadTask.snapshot.ref.getDownloadURL().then((url) =>{
-                    setDownloadURL(url);
-                    console.log("url");
-                    console.log(url);
-                })
-                //document.getElementById("file").value = null
-
-            }
-        )*/
     }
 
-    // get filepath
+    // Setting the current filepath
     const getFilepath = async(uri) =>
     {
-        //console.log("add_edit_event filepath");
-        //console.log(uri);
        setCurrentFilepath(uri);
-
     }
 
-
-
-
-    // Gemmer disse oplysninger.
+    // Save the new event
     const handleSave = async() => {
         setDisableButton(true);
 
         const { Name, Location, Time, Description, Image} = newEvent;
-        // Tjekker om felterne er tomme.
+        // Check if any fields are empty
         if(Name.length === 0 || Location.length === 0 || Time.length === 0 || Description.length === 0 || currentFilepath.length === 0){
-            return Alert.alert('You did not fill out one of the inputs!');
+            return Alert.alert('Du har ikke udfyldt alle felterne!');
         }
+        //Uploads the picture to firebase Storage
         let filePath = await handleUpload(currentFilepath, Name);
-        //setfilepath(imgURL);
+        //Checks if we are editing an event or creating it.
         if(isEditEvent){
             const id = route.params.Event[0][0];
             try {
+                //Update event in firebase
                 firebase
                     .database()
                     .ref(`/Events/${id}`)
@@ -194,8 +148,9 @@ const add_edit_event = ({navigation,route}) => {
                     const UserSend = userMarkerCoordinates;
                     const newFilePath = filePath;
                     const Event = [id,newEvent, UserSend,newFilePath]
-                    Alert.alert("Your event has been updated");
+                    Alert.alert("Eventet er opdateret");
                     setDisableButton(false);
+                    //Navigate back to Event details
                     navigation.navigate("Event Details",{Event});
                 });
 
@@ -205,13 +160,15 @@ const add_edit_event = ({navigation,route}) => {
 
         }else{
             try {
+                //Creates a new event
                 const user = firebase.auth().currentUser.uid;
                 firebase
                     .database()
                     .ref('/Events/')
                     .push({ Name, Location, Time, Description,Image, userMarkerCoordinates,user, filePath}).then(()=>{
                     childRef.current.reset();
-                    Alert.alert(`Saved`);
+                    Alert.alert(`Dit event er gemt`);
+                    //Removes all data
                     setNewEvent(initialState)
                     setUserMarkerCoordinates([]);
                     setCurrentFilepath("");
@@ -250,26 +207,12 @@ const add_edit_event = ({navigation,route}) => {
             <Text style={styles.label2}> Pick location: </Text>
             <Map ref={childRef} parentCallback={callbackAdd}  parentRemoveCallback={callbackRemove} userMarkerCoordinatesParent={userMarkerCoordinates} isEditEvent={false} style={styles.maps}/>
 
+            <Button title={ isEditEvent ? "Gem ændringer" : "Tilføj Event"} onPress={() => handleSave()} color={"#4db5ac"} disabled={disableButton} />
 
-
-            <Button title={ isEditEvent ? "Save changes" : "Add Event"} onPress={() => handleSave()} color={"#4db5ac"} disabled={disableButton} />
-
-         </SafeAreaView>
+        </SafeAreaView>
 
     );
 }
-/*
-            <TouchableOpacity disabled={{disableButton}} onPress={() => handleSave()} color={"#4db5ac"} style={styles.button}>
-                <Text>{ isEditEvent ? "Save changes" : "Add Event"}</Text>
-            </TouchableOpacity>
-
-*            {(currentFilepath.length !== 0) ?<Image source={{ uri: currentFilepath }} style={{ width: '50%', height: 150}} /> :  <Image style={styles.avatarImage} source= images.avatar/>}
-         <Button title={ isEditEvent ? "Save changes" : "Add Event"} onPress={() => handleSave()} color={"#4db5ac"} />
-
-*                 <Map ref={childRef} parentCallback={callbackAdd}  parentRemoveCallback={callbackRemove} userMarkerCoordinatesParent={userMarkerCoordinates} isEditEvent={false}/>
-                <Button title={ isEditEvent ? "Save changes" : "Add Event"} onPress={() => handleSave()} color={"#4db5ac"} />
- <UploadImage/>
-* * */
 
 export default add_edit_event;
 
@@ -282,10 +225,6 @@ const styles = StyleSheet.create({
         margin: 5,
         padding: 5,
         height: 100,
-        //borderBottomLeftRadius: 5,
-        //borderBottomRightRadius: 5,
-        //borderTopLeftRadius: 5,
-        //borderTopRightRadius: 5,
         overflow: 'hidden',
         backgroundColor: "#ffff",
         borderColor:"#4db5ac",
@@ -294,9 +233,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         height: 30,
         margin: 15,
-        //padding: 5,
         marginBottom: -5,
-
     },
     button: {
         alignItems: 'center',
@@ -326,15 +263,8 @@ const styles = StyleSheet.create({
 
     picks:
         {
-            //left: '70%',
-            //bottom: '145%',
         },
     maps: {
         position: 'absolute',
-        //flex: 1,
-        //backgroundColor: 'black',
-        //bottom:'50%',
     },
-
-
 });

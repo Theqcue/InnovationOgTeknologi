@@ -3,24 +3,22 @@ import { Text, View, StyleSheet, Button, SafeAreaView } from 'react-native';
 import Constants from 'expo-constants';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
-import {Accuracy} from "expo-location";
 import {useState, useEffect} from "react";
 import firebase from "firebase";
 import {useIsFocused} from "@react-navigation/native";
 
 
 const AllEventsMap = ({navigation,route}) => {
-
+    //Setting the state
     const [hasLocationPermission, setlocationPermission] = useState(false)
     const [currentLocation, setCurrentLocation] = useState(null)
     const [userMarkerCoordinates, setUserMarkerCoordinates] = useState([])
-    const [selectedCoordinate, setSelectedCoordinate] = useState(null)
-    const [selectedAddress, setSelectedAddress] = useState(null)
     const [Events, setEvents] = useState([])
     const [ids, setIds] = useState([])
 
     const isFocused = useIsFocused();
 
+    //Get location permissions
     const getLocationPermission = async () => {
         await Location.requestForegroundPermissionsAsync().then((item) => {
             setlocationPermission(item.granted)
@@ -29,12 +27,10 @@ const AllEventsMap = ({navigation,route}) => {
     };
 
     useEffect(() => {
-        console.log("ef1")
         const response = getLocationPermission()
     });
-
+    //Getting all the Map-markers that are in the database
     useEffect(() => {
-        console.log("ef3")
         firebase
             .database()
             .ref('/Events')
@@ -46,16 +42,10 @@ const AllEventsMap = ({navigation,route}) => {
                 let i = 0
                 const no_of_events = Object.keys(snapshot.val()).length;
                 let last_run = false;
-                //console.log("snapshot");
-                //console.log(Object.keys(snapshot.val()));
                 snapshot.forEach((data, index) => {
-                    //console.log("index");
-                    //console.log(index);
 
                     x.push([data.key, data.val()]);
                     i = i + 1;
-                    console.log(i);
-                    console.log(no_of_events);
                     if (i === no_of_events) {
                         last_run = true;
                         setEvents(snapshot.val());
@@ -79,52 +69,23 @@ const AllEventsMap = ({navigation,route}) => {
 
     }, []);
 
-    const updateLocation = async () => {
-        await Location.getCurrentPositionAsync({accuracy: Accuracy.Balanced}).then((item) => {
-            setCurrentLocation(item.coords)
-        });
-    };
-
+    //Dont do anything if the user tries to create a marker
     const handleLongPress = event => {
-        // const coordinate = event.nativeEvent.coordinate
-        // setUserMarkerCoordinates((oldArray) => [...oldArray, coordinate])
     };
 
+    //Navigate to event details on press
     const handleSelectMarker =  id => {
-        console.log(id);
-        //console.log(Events[0][0]);
         const Event = Object.entries(Events).find( Event => Event[0] === id /*id*/)
-        console.log(Event);
         navigation.navigate('Event Details', { Event});
 
-
-
-        /*console.log("insideSelectMaker");
-        console.log(coordinate);
-        setSelectedCoordinate(coordinate)
-        await Location.reverseGeocodeAsync(coordinate).then((data) => {
-                console.log(data);
-                setSelectedAddress(data)
-             console.log(selectedAddress )
-            console.log("selectedCoordinate && selectedAddress")
-            }
-        )
-         */
     };
-
-    const CloseBox = () => {
-        setSelectedCoordinate(null) && setSelectedAddress(null);
-    }
-
-    const closeInfoBox = () =>
-        setSelectedCoordinate(null) && setSelectedAddress(null)
-
+    //Finds the location of the user
     const RenderCurrentLocation = (props) => {
         if (props.hasLocationPermission === null) {
             return null;
         }
         if (props.hasLocationPermission === false) {
-            return <Text>No location access. Go to settings to change</Text>;
+            return <Text> Ikke nogen lokationsadgang. Gå til indstillinger for at ændre.</Text>;
         }
         return (
             <View>
@@ -138,12 +99,7 @@ const AllEventsMap = ({navigation,route}) => {
             </View>
         );
     };
-    //console.log("isFocused");
-    //console.log(isFocused);
     const userMarkerCoordinatesArray = Object.values(userMarkerCoordinates);
-    //console.log(userMarkerCoordinatesArray);
-    //const eventArray = Events;
-    //const eventIndex = Object.keys(Events);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -167,17 +123,14 @@ const AllEventsMap = ({navigation,route}) => {
                         (
                             <Marker
                                 coordinate={coordinate}
-                                //title={ids[index]}
                                 key={index}
                                 onPress={() => handleSelectMarker(ids[index])}
                             />
                         )) : <Marker
                         coordinate={{latitude: 55.676195, longitude: 12.569419}}
-                        title="not Rådhuset"
+                        title="Rådhuset"
                         description="Flee market"
                     />}
-
-
             </MapView>
         </SafeAreaView>
     )
@@ -185,7 +138,6 @@ const AllEventsMap = ({navigation,route}) => {
 }
 export default AllEventsMap;
 
-//Lokal styling til brug i App.js
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -197,7 +149,6 @@ const styles = StyleSheet.create({
     map: { flex: 1 },
     infoBox: {
         height: 200,
-        //position: 'absolute',
         bottom: 0,
         left: 0,
         right: 0,
@@ -210,18 +161,3 @@ const styles = StyleSheet.create({
         fontSize: 15,
     },
 });
-
-/*
-*                 {selectedCoordinate && selectedAddress &&
-                (
-                    <View style={styles.infoBox}>
-                        <Text style={styles.infoText}>
-                            Address: {selectedAddress[0].street} {selectedAddress[0].name} {selectedAddress[0].postalCode} {selectedAddress[0].city}
-                        </Text>
-
-                        <Button title="Close" onPress={CloseBox} />
-                    </View>
-                )
-                }
-*
-* */

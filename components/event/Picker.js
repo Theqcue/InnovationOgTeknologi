@@ -2,8 +2,6 @@ import React, {useState, useCallback, useEffect} from 'react';
 import {Image, Platform, StyleSheet, TouchableOpacity, View, Text, Button} from 'react-native';
 //import * as ImagePicker from 'react-native-image-picker';
 import * as ImagePicker from 'expo-image-picker';
-import {ImagePickerHeader} from "./ImagePickHead";
-import {ImagePickerAvatar} from "./ImagePickAva";
 import {ImagePickerModal} from "./ImagePicker";
 import {images} from "../../assets";
 
@@ -12,6 +10,7 @@ export default function Picker({getFilepath}) {
     const [visible, setVisible] = useState(false);
     const [image, setImage] = useState(null);
 
+    //Checking if camara permissions are granted
     useEffect(() => {
         (async () => {
             if (Platform.OS !== 'web') {
@@ -23,7 +22,7 @@ export default function Picker({getFilepath}) {
         })();
     }, []);
 
-
+    //Picking the image - launching the Library
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -38,6 +37,7 @@ export default function Picker({getFilepath}) {
         }
     };
 
+    //Taking a new picture - lanuching camara
     const onCameraPress = async ()=>{
         const {granted} =  await ImagePicker.requestCameraPermissionsAsync();
         if(granted){
@@ -51,17 +51,13 @@ export default function Picker({getFilepath}) {
                 const newfile = {
                     uri:data.uri,
                 }
-                //handleUpload(newfile)
-                console.log(newfile);
                 setPickerResponse(newfile.uri);
                 getFilepath(newfile.uri);
             }
         }else{
-            Alert.alert("you need to give up permission to work")
+            Alert.alert("Du skal give adgang til at vælge billeder")
         }
     }
-
-    const uri = pickerResponse;
 
     return (
         <View style={styles.screen}>
@@ -88,9 +84,6 @@ const styles = StyleSheet.create({
         width: 54,
     },
     addButton: {
-        //height: 54,
-        //width: 54,
-        //backgroundColor: '#f2f2fC',
         borderRadius: 50,
         position: 'absolute',
         left: '70%',
