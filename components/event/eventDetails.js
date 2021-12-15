@@ -156,14 +156,13 @@ const EventDetails = ({route,navigation}) => {
             <Text></Text>
             {(firebase.auth().currentUser.uid !== Event.user) ? null : <Button title="Edit" onPress={ () => handleEdit()} color={"#4db5ac"} />}
             <Text></Text>
-            {(firebase.auth().currentUser.uid !== Event.user) ? null : <Button title="Delete" onPress={() => confirmDelete()} color={"#4db5ac"}/>}
-            <Text></Text>
             {(eventParticipation) ? <Text> you are participating this event</Text> : <Button title="Deltag" onPress={() => confirmDeltag()} color={"#4db5ac"}/>}
 
-        </View>
+        </View> 
     );
 }
 //(item[0] ==='Image') ? Image source={{ uri: item.Image }} style={{ width: '100%', height: 150}} /> : <Text> </Text>
+//{(firebase.auth().currentUser.uid !== Event.user) ? null : <Button title="Delete" onPress={() => confirmDelete()} color={"#4db5ac"}/>}
 export default EventDetails;
 
 const styles = StyleSheet.create({

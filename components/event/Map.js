@@ -41,6 +41,8 @@ const Map = (prop, ref) => {
 
             const coordinate = event.nativeEvent.coordinate;
             setUserMarkerCoordinates((oldArray) => [...oldArray, coordinate]);
+            console.log('handle long press: ' + userMarkerCoordinates);
+            console.log('coordinate ' + coordinate);
             prop.parentCallback(coordinate);
         }
     };

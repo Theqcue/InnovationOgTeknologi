@@ -33,22 +33,26 @@ const Profile = ({navigation,route}) => {
                     if (data.exists()) {
                         const fetchedTasks = [];
                         const eventId = Object.values(data.val())[0].eventId;
+                        console.log(eventId);
                         setNo_of_events(eventId.length);
                         eventId.map(( (id, index) => {
                             firebase.database().ref(`/Events/${id}`)
                                 .once('value', dataSnapshot  => {
 
                                     }).then((data) => {
+                                    if(data.exists()) {
                                     fetchedTasks.push([id, data.val()]);
                                     if(index === (eventId.length-1))
                                         {
                                             setEvents1(fetchedTasks);
                                         }
-                                    })
+                                    }
+                                    });
+
                         }));
                     }
                 });
-               return () => console.log("return");
+               return () => setEvents1([]);
             },[])
             );
 
@@ -59,19 +63,19 @@ const Profile = ({navigation,route}) => {
     if (Events.length < 1) {
         return(<View>
             <Text>You have no upcoming events</Text>
-
         </View>);
     };
 
     if(eventArray.length !== no_of_events)
     {
+        console.log(no_of_events);
+        console.log(eventArray.length);
         return <Text>loading</Text>;
     };
 
     const handleSelectEvent = Event => {
         navigation.navigate('Event Details', {Event});
     };
-
 
     return (
         <SafeAreaView style={{flex: 1}}>
@@ -84,7 +88,8 @@ const Profile = ({navigation,route}) => {
                 data={eventArray}
                 keyExtractor={(item, index) => eventArray[index][0]}
                 renderItem={({ item, index }) => {
-                    console.log(item[0]);
+                    console.log("item");
+                    console.log(item);
                     return(
                         <TouchableOpacity style={styles.container} onPress={() => handleSelectEvent([item[0], item[1]])}>
                             <View>

@@ -52,6 +52,19 @@ function HomeScreen(){
         )
     }
 
+    const StackNavigationAllMap = () => {
+        return (
+            <Stack2.Navigator>
+                <Stack2.Screen name={"Map for all events"} component={AllEventsMap} options={{title: "All Events",
+                    headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold",}, headerStatusBarHeight:25}}/>
+                <Stack2.Screen name={"Event Details"} component={eventDetails} options={{title: "Event Details",
+                    headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold",}, headerStatusBarHeight:25}}/>
+                <Stack2.Screen name={"Edit Event"} component={add_edit_event} options={{title: "Edit Event",
+                    headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold",}, headerStatusBarHeight:25}}/>
+
+            </Stack2.Navigator>
+        )
+    }
     // Opretter en navigations container så man kan navigere mellem "Upcoming Events" tab og "Add Event" tabs.
     return (
         <NavigationContainer>
@@ -60,8 +73,7 @@ function HomeScreen(){
                 <Tab.Screen name={'Upcoming Events'} component={StackNavigation} options={{tabBarIcon: () => ( <Ionicons name="list" size={30} color={"#4db5ac"} />),headerShown:null}}/>
                 <Tab.Screen name={'Add Event'} component={add_edit_event} options={{tabBarIcon: () => ( <Ionicons name="add" size={30} color={"#4db5ac"}/>), title: "Add Event",
                     headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold"}}}/>
-                <Tab.Screen name={'Map'} component={AllEventsMap} options={{tabBarIcon: () => ( <Ionicons name="globe-outline" size={30} color={"#4db5ac"}/>), title: "Map",
-                    headerStyle:{borderColor: "#4db5ac"}, headerTintColor:"#ec6e35", headerTitleStyle:{fontWeight:"bold"}}}/>
+                <Tab.Screen name={'All Event Map'} component={StackNavigationAllMap} options={{tabBarIcon: () => ( <Ionicons name="globe-outline" size={30} color={"#4db5ac"} />),headerShown:null}}/>
 
             </Tab.Navigator>
         </NavigationContainer>

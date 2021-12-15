@@ -78,11 +78,7 @@ export default function Picker({getFilepath}) {
         </View>
     );
 }
-//            {(pickerResponse !== null) ? <Text> {pickerResponse} </Text> : <Text> No picker </Text>  }
-//<ImagePickerHeader />
-//<ImagePickerAvatar uri={uri} onPress={() => setVisible(true)} />
 
-//             <ImagePickerAvatar uri={uri} onPress={() => setVisible(true)} />
 const styles = StyleSheet.create({
     screen: {
 
